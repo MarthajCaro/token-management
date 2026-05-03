@@ -1,0 +1,179 @@
+<!-- Alert block -->
+ <div *ngIf="alertMessage" class="alert {{ alertClass }} mt-2" role="alert">
+    {{ alertMessage }}
+    <button type="button" class="btn-close" (click)="alertMessage=null"></button>
+</div>
+
+<!-- Button to create a new service -->
+<div class="d-flex justify-content-end mb-3" *ngIf="userRole === 'admin'">
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createServiceModal">
+    <i class="bi bi-plus-circle"></i> Create new service
+    </button>
+</div>
+
+<!-- Search Filters -->
+<div class="card shadow-sm p-3 mb-4">
+<div class="row g-3 align-items-end">
+    <!-- Service name or description search -->
+    <div class="col-md-6">
+    <label for="searchService" class="form-label fw-bold">Search service</label>
+    <input
+        type="text"
+        id="searchService"
+        class="form-control"
+        placeholder="Enter name or description..."
+        [(ngModel)]="searchText"
+        name="searchText"
+    />
+    </div>
+
+    <!-- Buttons -->
+    <div class="col-md-3 text-end">
+    <button class="btn btn-primary w-100 mb-2" (click)="searchServices()">
+        <i class="bi bi-search"></i> Search
+    </button>
+    <button class="btn btn-secondary w-100" (click)="resetFilters()">
+        <i class="bi bi-x-circle"></i> Reset
+    </button>
+    </div>
+</div>
+</div>
+
+<!-- Modal for creating service -->
+<div class="modal fade" id="createServiceModal" tabindex="-1" aria-labelledby="createServiceModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+    <div class="modal-content">
+        
+        <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="createServiceModalLabel">Create service</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+    <div class="modal-body">
+        <form>
+        <!-- Name -->
+        <div class="mb-3">
+            <label for="serviceName" class="form-label">Name</label>
+            <input type="text" class="form-control" id="serviceName" placeholder="Enter service name"
+            [(ngModel)]="newService.name" name="name" required>
+        </div>
+
+        <!-- Description -->
+        <div class="mb-3">
+            <label for="serviceDescription" class="form-label">Description</label>
+            <textarea id="serviceDescription" class="form-control" placeholder="Enter description"  
+            [(ngModel)]="newService.description" name="description"></textarea>
+        </div>
+        </form>
+    </div>
+
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" (click)="saveService()" data-bs-dismiss="modal">Save</button>
+    </div>
+    </div>
+</div>
+</div>
+
+<!-- Service editing form -->
+<div class="modal fade" id="editServiceModal" tabindex="-1" aria-labelledby="editServiceModalLabel" aria-hidden="true">
+<div class="modal-dialog">
+    <div class="modal-content">
+    <div class="modal-header bg-warning text-white">
+        <h5 class="modal-title" id="editServiceModalLabel">Edit service</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+
+    <div class="modal-body">
+        <form>
+        <!-- Name -->
+        <div class="mb-3">
+            <label for="editServiceName" class="form-label">Name</label>
+            <input type="text" class="form-control" id="editServiceName"
+            [(ngModel)]="selectedService.name" name="editName">
+        </div>
+
+        <!-- Description -->
+        <div class="mb-3">
+            <label for="editServiceDescription" class="form-label">Description</label>
+            <textarea class="form-control" id="editServiceDescription" rows="3"
+            [(ngModel)]="selectedService.description" name="editDescription"></textarea>
+        </div>
+        </form>
+    </div>
+
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-warning" (click)="updateService()" data-bs-dismiss="modal">Update</button>
+    </div>
+    </div>
+</div>
+</div>
+
+<!-- Table of services -->
+<div class="table-responsive mt-4">
+<table class="table table-striped align-middle text-center shadow-sm">
+    <thead class="table-primary">
+    <tr>
+        <th>Name</th>
+        <th>Description</th>
+        <th *ngIf="userRole === 'admin' || userRole === 'editor'">Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let service of servicesList">
+        <td>{{ service.name }}</td>
+        <td>{{ service.description }}</td>
+
+        <td *ngIf="userRole === 'admin' || userRole === 'editor'">
+        <div class="btn-group" role="group">
+            <!-- Edit: admin and editor -->
+            <button *ngIf="userRole === 'admin' || userRole === 'editor'" class="btn btn-sm btn-warning"
+            title="Edit" data-bs-toggle="modal" data-bs-target="#editServiceModal"
+            (click)="openEditModal(service)">
+            <i class="bi bi-pencil"></i>
+            </button>
+
+            <!-- Delete: admin only -->
+            <button *ngIf="userRole === 'admin'" class="btn btn-sm btn-danger" title="Delete"
+            (click)="deleteService(service.id)">
+            <i class="bi bi-trash"></i>
+            </button>
+        </div>
+        </td>
+    </tr>
+    </tbody>
+</table>
+</div>
+
+<!-- Modal Edit -->
+<div class="modal fade" id="editServiceModal" tabindex="-1" aria-labelledby="editServiceModalLabel" aria-hidden="true">
+<div class="modal-dialog">
+    <div class="modal-content">
+
+    <div class="modal-header bg-warning text-dark">
+        <h5 class="modal-title" id="editServiceModalLabel">Edit Service</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+
+    <div class="modal-body">
+        <form>
+        <div class="mb-3">
+            <label class="form-label">Name</label>
+            <input type="text" class="form-control" [(ngModel)]="selectedService.name" name="name" required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Description</label>
+            <textarea class="form-control" [(ngModel)]="selectedService.description" name="description" required></textarea>
+        </div>
+        </form>
+    </div>
+
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-warning" (click)="updateService()">Save Changes</button>
+    </div>
+    </div>
+</div>
+</div>

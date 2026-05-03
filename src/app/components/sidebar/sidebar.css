@@ -1,0 +1,52 @@
+nav {
+background-color: #f8f9fa; 
+min-height: 100vh;
+padding-top: 1rem;
+}
+
+.nav-link.active {
+background-color: #0d6efd;
+color: #fff !important;
+border-radius: 10px;
+}
+
+.btn-outline-danger {
+border-radius: 8px;
+font-weight: 500;
+}
+
+.sidebar-container {
+
+background-color:  #1e3a8a;
+min-height: 100vh;
+width: 220px;
+display: flex;
+flex-direction: column;
+justify-content: space-between;
+}
+
+.nav-link {
+color: #ffffff;
+border-radius: 6px;
+padding: 8px 12px;
+transition: background-color 0.2s ease;
+}
+
+.nav-link:hover,
+.nav-link.active {
+background-color: #0b5ed7;
+}
+
+.btn-primary {
+background-color: #f8f9fa;
+color: #0d6efd;
+border: none;
+font-weight: 500;
+transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+background-color: #e2e6ea;
+color: #0a58ca;
+}
+

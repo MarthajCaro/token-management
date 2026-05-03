@@ -1,0 +1,35 @@
+<nav class="sidebar-container d-flex flex-column justify-content-between p-3">
+    <div>
+  
+    <ul class="nav flex-column">
+      <!-- Users -->
+      <li class="nav-item mb-2">
+        <a routerLink="/dashboard/users" routerLinkActive="active" class="nav-link text-white">
+          <i class="fas fa-user me-2"></i> Users
+        </a>
+      </li>
+
+      <!-- Tokens -->
+      <li class="nav-item mb-2">
+        <a routerLink="/dashboard/tokens" routerLinkActive="active" class="nav-link text-white">
+          <i class="fas fa-key me-2"></i> Tokens
+        </a>
+      </li>
+
+      <!-- Services -->
+      <li class="nav-item mb-2">
+        <a routerLink="/dashboard/services" routerLinkActive="active" class="nav-link text-white">
+          <i class="fas fa-cogs me-2"></i> Services
+        </a>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Bottom part -->
+  <div class="text-center mt-4">
+    <p class="text-light mb-2 small">Role: <strong>{{ userRole }}</strong></p>
+    <button class="btn btn-sm btn-primary w-100" (click)="logout()">
+      <i class="fas fa-sign-out-alt me-1"></i> Sign out
+    </button>
+  </div>
+</nav>

@@ -1,0 +1,210 @@
+<!-- Visual alert block -->
+<div *ngIf="alertMessage" class="alert {{ alertClass }} alert-dismissible fade show mt-2" role="alert">
+  {{ alertMessage }}
+  <button type="button" class="btn-close" (click)="alertMessage=null"></button>
+</div>
+
+<!-- Button -->
+<div class="d-flex justify-content-end mb-3" *ngIf="userRole === 'admin'">
+  <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createTokenModal">
+    <i class="bi bi-plus-circle"></i> Create new token
+  </button>
+</div>
+<!--Search filters -->
+<div class="card shadow-sm p-3 mb-4">
+  <div class="row g-3 align-items-end">
+
+    <!-- Service filter -->
+    <div class="col-md-4">
+      <label for="searchService" class="form-label fw-bold">Service</label>
+      <select id="searchService" class="form-select" [(ngModel)]="searchService" name="searchService">
+        <option value="">All services</option>
+        <option *ngFor="let service of servicesList" [value]="service.name">{{ service.name }}</option>
+      </select>
+    </div>
+
+    <!-- Date range filters -->
+    <div class="col-md-3">
+      <label for="startDate" class="form-label fw-bold">Start date</label>
+      <input type="date" id="startDate" class="form-control" [(ngModel)]="startDate" name="startDate">
+    </div>
+
+    <div class="col-md-3">
+      <label for="endDate" class="form-label fw-bold">End date</label>
+      <input type="date" id="endDate" class="form-control" [(ngModel)]="endDate" name="endDate">
+    </div>
+
+    <!-- Buttons -->
+    <div class="col-md-2 text-end">
+      <button class="btn btn-primary w-100 mb-2" (click)="searchTokens()">
+        <i class="bi bi-search"></i> Search
+      </button>
+      <button class="btn btn-secondary w-100" (click)="resetFilters()">
+        <i class="bi bi-x-circle"></i> Reset
+      </button>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- Modal -->  
+<div class="modal fade" id="createTokenModal" tabindex="-1" aria-labelledby="createTokenModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <!-- HEADER -->
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="createTokenModalLabel">Create token</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <!-- BODY -->
+      <div class="modal-body">
+        <form>
+
+          <!-- Value -->
+          <div class="mb-3">
+            <label for="tokenValue" class="form-label">Value</label>
+            <input
+            type="text" 
+            class="form-control" 
+            id="tokenValue" 
+            placeholder="Enter token value"
+            [(ngModel)]="newToken.value"
+            name="value"
+            required
+            >
+          </div>
+
+          <!-- Creation date -->
+          <div class="mb-3">
+            <label for="tokenCreationDate" class="form-label">Creation date</label>
+            <input type="datetime-local" class="form-control" id="tokenCreationDate" 
+            [(ngModel)]="newToken.creation_date" name="creation_date" required>
+          </div>
+
+          <!-- Expiration date -->
+          <div class="mb-3">
+            <label for="tokenExpirationDate" class="form-label">Expiration date</label>
+            <input type="datetime-local" 
+            class="form-control" 
+            id="tokenExpirationDate"
+            [(ngModel)]="newToken.expiration_date"
+            name="expiration_date"
+            required >
+          </div>
+
+          <!-- User ID (select) -->
+          <div class="mb-3">
+            <label for="tokenUserId" class="form-label">User</label>
+            <select id="tokenUserId" class="form-select" [(ngModel)]="newToken.user_id" name="user_id" required>
+              <option value="">Select user</option>
+              <option *ngFor="let user of usersList" [value]="user.id">{{ user.name }}</option>
+            </select>
+          </div>
+
+          <!-- Service ID (select) -->
+          <div class="mb-3">
+            <label for="tokenServiceId" class="form-label">Service</label>
+            <select id="tokenServiceId" class="form-select" [(ngModel)]="newToken.service_id" name="service_id" required>
+              <option value="">Select service</option>
+              <option *ngFor="let service of servicesList" [value]="service.id">{{ service.name }}</option>
+            </select>
+          </div>
+        </form>
+      </div>
+
+      <!-- FOOTER  functional button -->
+      <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+      <button type="button" class="btn btn-primary" (click)="saveToken()">Save</button>
+    </div>
+    </div>
+  </div>
+</div>
+<!-- Token table -->
+<div class="table-responsive mt-4">
+  <table class="table table-striped align-middle text-center shadow-sm">
+    <thead class="table-primary">
+      <tr>
+        <th>Value</th>
+        <th>Creation date</th>
+        <th>Expiration date</th>
+        <th>User</th>
+        <th>Service</th>
+        <th *ngIf="userRole === 'admin' || userRole === 'editor'">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let token of tokenList">
+        <td>{{ token.value }}</td>
+        <td>{{ token.creation_date | date:'MM/dd/yy, h:mm a' }}</td>
+        <td>{{ token.expiration_date | date:'MM/dd/yy, h:mm a' }}</td>
+
+        <td>{{ getUserName(token.user_id) }}</td>
+        <td>{{ getServiceName(token.service_id) }}</td>
+
+        <td *ngIf="userRole === 'admin' || userRole === 'editor'">
+          <div class="btn-group" role="group">
+            <!-- Edit: visible to admin and editor -->
+            <button *ngIf="userRole === 'admin' || userRole === 'editor'" class="btn btn-sm btn-warning" title="Edit"
+              data-bs-toggle="modal" data-bs-target="#editTokenModal" (click)="openEditModal(token)">
+              <i class="bi bi-pencil"></i>
+            </button>
+            <!-- Delete: visible only to admin -->
+            <button *ngIf="userRole === 'admin'" class="btn btn-sm btn-danger" title="Delete"
+              (click)="deleteToken(token.id)">
+              <i class="bi bi-trash"></i>
+            </button>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Modal Edit -->
+<div class="modal fade" id="editTokenModal" tabindex="-1" aria-labelledby="editTokenModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <div class="modal-header bg-warning text-dark">
+        <h5 class="modal-title" id="editTokenModalLabel">Edit Token</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body">
+        <form>
+          <div class="mb-3">
+            <label class="form-label">Value</label>
+            <input type="text" class="form-control" [(ngModel)]="selectedToken.value" name="value" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Expiration date</label>
+            <input type="datetime-local" class="form-control" [(ngModel)]="selectedToken.expiration_date" name="expiration_date" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">User</label>
+            <select class="form-select" [(ngModel)]="selectedToken.user_id" name="user_id">
+              <option *ngFor="let user of usersList" [value]="user.id">{{ user.name }}</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Service</label>
+            <select class="form-select" [(ngModel)]="selectedToken.service_id" name="service_id">
+              <option *ngFor="let service of servicesList" [value]="service.id">{{ service.name }}</option>
+            </select>
+          </div>
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-warning" (click)="updateToken()">Save Changes</button>
+      </div>
+    </div>
+  </div>
+</div>

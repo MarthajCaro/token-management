@@ -1,0 +1,233 @@
+<!-- 🔔 Alert block -->
+<div *ngIf="alertMessage" class="alert {{ alertClass }} alert-dismissible fade show mt-2" role="alert">
+  {{ alertMessage }}
+  <button type="button" class="btn-close" (click)="alertMessage=null"></button>
+</div>
+
+<!-- 🔘 Create button (top right) -->
+<div class="d-flex justify-content-end mb-3" *ngIf="userRole === 'admin'">
+  <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createUserModal">
+    <i class="bi bi-plus-circle"></i> Create new user
+  </button>
+</div>
+
+<!-- 🔍 Search filters card -->
+<div class="card shadow-sm p-3 mb-4">
+  <div class="row g-3 align-items-end">
+    <!-- Name search -->
+    <div class="col-md-4">
+      <label for="searchName" class="form-label fw-bold">Search name</label>
+      <input
+        type="text"
+        id="searchName"
+        class="form-control"
+        placeholder="Enter a name..."
+        [(ngModel)]="searchName"
+        name="searchName"
+      >
+    </div>
+
+    <!-- Role filter -->
+    <div class="col-md-3">
+      <label for="searchRole" class="form-label fw-bold">Role</label>
+      <select
+        id="searchRole"
+        class="form-select"
+        [(ngModel)]="searchRole"
+        name="searchRole"
+      >
+        <option value="">All roles</option>
+        <option value="admin">Admin</option>
+        <option value="editor">Editor</option>
+        <option value="reader">Reader</option>
+      </select>
+    </div>
+
+    <!-- Buttons -->
+    <div class="col-md-2 text-end">
+      <button class="btn btn-primary w-100 mb-2" (click)="searchUsers()">
+        <i class="bi bi-search"></i> Search
+      </button>
+      <button class="btn btn-secondary w-100" (click)="resetFilters()">
+        <i class="bi bi-x-circle"></i> Reset
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- User table -->
+<div class="table-responsive mt-4">
+  <table class="table table-striped align-middle text-center shadow-sm">
+    <thead class="table-primary">
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Role</th>
+        <th *ngIf="userRole === 'admin' || userRole === 'editor'">Actions</th>
+        
+      </tr>
+    </thead>
+
+    <tbody>
+  <tr *ngFor="let user of usersList">
+  <td>{{ user.id }}</td>
+  <td>{{ user.name }}</td>
+  <td>{{ user.email }}</td>
+  <td>{{ user.role }}</td>
+
+  <!-- Show Actions column if the role is admin or editor -->
+  <td *ngIf="userRole === 'admin' || userRole === 'editor'">
+    <div class="btn-group" role="group">
+
+      <!-- Edit visible to admin and editor -->
+      <button
+        class="btn btn-sm btn-warning"
+        title="Edit"
+        (click)="openEditModal(user)"
+        
+      >
+        <i class="bi bi-pencil"></i>
+      </button>
+
+      <!-- Remove visible only for admin -->
+      <button
+        *ngIf="userRole === 'admin'"
+        class="btn btn-sm btn-danger ms-2"
+        title="Delete"
+        (click)="deleteUser(user.id)"
+      >
+        <i class="bi bi-trash"></i>
+      </button>
+
+    </div>
+  </td>
+</tr>
+
+
+  <!-- When no users exist -->
+  <tr *ngIf="usersList.length === 0">
+    <td colspan="5" class="text-muted">No users found</td>
+  </tr>
+</tbody>
+  </table>
+</div>
+
+<!-- Modal: Edit user -->
+<div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content shadow-sm border-0">
+      <div class="modal-header bg-warning text-dark">
+        <h5 class="modal-title" id="editUserModalLabel">Edit user</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body">
+        <form #editForm="ngForm" (ngSubmit)="updateUser()">
+          <!-- Name -->
+          <div class="mb-3">
+            <label for="editName" class="form-label">Name</label>
+            <input
+              type="text"
+              id="editName"
+              class="form-control"
+              [(ngModel)]="selectedUser.name"
+              name="editName"
+              required
+            />
+          </div>
+
+          <!-- Email -->
+          <div class="mb-3">
+            <label for="editEmail" class="form-label">Email</label>
+            <input
+              type="email"
+              id="editEmail"
+              class="form-control"
+              [(ngModel)]="selectedUser.email"
+              name="editEmail"
+              required
+            />
+          </div>
+
+          <!-- Role -->
+          <div class="mb-3">
+            <label for="editRole" class="form-label">Role</label>
+            <select
+              id="editRole"
+              class="form-select"
+              [(ngModel)]="selectedUser.role"
+              name="editRole"
+              required
+            >
+              <option value="admin">Administrator</option>
+              <option value="editor">Editor</option>
+              <option value="reader">Reader</option>
+            </select>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-warning">Update</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Create user -->
+<div class="modal fade" id="createUserModal" tabindex="-1" aria-labelledby="createUserModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content shadow-sm border-0">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="createUserModalLabel">Create user</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body">
+        <form #userForm="ngForm" (ngSubmit)="saveUser()">
+          <div class="mb-3">
+            <label for="userName" class="form-label">Name</label>
+            <input type="text" class="form-control" id="userName"
+                  [(ngModel)]="newUser.name" name="name" required />
+          </div>
+
+          <div class="mb-3">
+            <label for="userEmail" class="form-label">Email</label>
+            <input type="email" class="form-control" id="userEmail"
+                  [(ngModel)]="newUser.email" name="email" required />
+          </div>
+
+          <div class="mb-3">
+            <label for="userPassword" class="form-label">Password</label>
+            <input type="password" class="form-control" id="userPassword"
+                  [(ngModel)]="newUser.password" name="password" required />
+          </div>
+
+          <div class="mb-3">
+            <label for="confirmPassword" class="form-label">Confirm password</label>
+            <input type="password" class="form-control" id="confirmPassword"
+                  [(ngModel)]="newUser.confirmPassword" name="confirmPassword" required />
+          </div>
+
+          <div class="mb-3">
+            <label for="userRole" class="form-label">Role</label>
+            <select id="userRole" class="form-select"
+                    [(ngModel)]="newUser.role" name="role" required>
+              <option value="">Select a role</option>
+              <option value="admin">Administrator</option>
+              <option value="editor">Editor</option>
+              <option value="reader">Reader</option>
+            </select>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
