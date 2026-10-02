@@ -1,13 +1,22 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { map, Observable } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 import { environment } from '../../environments/environment';
 
-interface TokenData {
-  access_token: string,
-  token_type: string,
-  expires_in: number
+interface AuthResponse {
+  access_token: string;
+  token_type: string;
+  expires_in: number;
+  user: {
+    id: number;
+    name: string;
+    email: string;
+    role: string;
+  };
 }
+
+const TOKEN_KEY = 'accessToken';
+const USER_KEY = 'loggedUser';
 
 @Injectable({
   providedIn: 'root'
@@ -17,13 +26,38 @@ export class AuthService {
 
   constructor(private http: HttpClient) {}
 
-  getTokenAuth(): Observable<string> {
-    const body = {
-      client_id: environment.clientId,
-      client_secret: environment.clientSecret
-    };
+  // The credentials are verified on the server. The JWT it returns is the one
+  // used as Bearer token for every protected request.
+  login(email: string, password: string): Observable<AuthResponse> {
+    return this.http
+      .post<AuthResponse>(`${this.baseUrl}/auth/login`, { email, password })
+      .pipe(
+        tap((res) => {
+          localStorage.setItem(TOKEN_KEY, res.access_token);
+          localStorage.setItem(USER_KEY, JSON.stringify(res.user));
+          localStorage.setItem('userId', res.user.id.toString());
+          localStorage.setItem('role', res.user.role);
+        })
+      );
+  }
 
-    return this.http.post<TokenData>(`${this.baseUrl}/auth/token`, body)
-    .pipe(map((res : any) => res.access_token)); 
+  getToken(): string | null {
+    return localStorage.getItem(TOKEN_KEY);
+  }
+
+  getLoggedUser(): AuthResponse['user'] | null {
+    const raw = localStorage.getItem(USER_KEY);
+    return raw ? JSON.parse(raw) : null;
+  }
+
+  isAuthenticated(): boolean {
+    return !!this.getToken();
+  }
+
+  logout(): void {
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(USER_KEY);
+    localStorage.removeItem('userId');
+    localStorage.removeItem('role');
   }
 }

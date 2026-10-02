@@ -1,35 +1,60 @@
 # Token Management System
 
-This is a web application developed to manage tokens, built using Angular for the frontend.
+Web application to manage service tokens, built with Angular for the frontend.
 
 ## Features
-- Token management system
-- Interactive user interface
-- Form handling and validations
-- Integration with backend APIs
+- Token management per user and service
+- Login with role-based access (admin, editor, reader)
+- Reactive forms with validation
+- JWT authentication
+- REST API integration
 
 ## Technologies
-- Angular
+- Angular 18
 - TypeScript
 - HTML5
-- CSS
+- Bootstrap 5
+- Jest
 
 ## Installation
 
 1. Clone the repository:
-git clone https://github.com/your-username/token-management.git
+```bash
+git clone https://github.com/MarthajCaro/token-management.git
+cd token-management
+```
 
 2. Install dependencies:
+```bash
 npm install
+```
 
-3. Run the application:
-ng serve
+3. Start the development server:
+```bash
+npm start
+```
 
-4. Open in browser:
+4. Open in the browser:
+```
 http://localhost:4200/
+```
+
+## Tests
+
+```bash
+npm test
+```
+
+## Configuration
+
+The API base URL lives in `src/environments/environment.ts`. There are no
+credentials in this repository: the frontend never holds a client secret.
+
+## Backend
+
+This app needs the API running on `http://localhost:3000`.
+
+https://github.com/MarthajCaro/token-management-api
 
 ## Author
 Martha Caro – Junior Full Stack Developer
-
-## Backend Repository  
-https://github.com/MarthajCaro/token-management-api

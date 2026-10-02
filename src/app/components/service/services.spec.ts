@@ -5,7 +5,6 @@ import { importProvidersFrom } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { TestComponentRenderer } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
-import { of } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
 
 // Mock renderer required
@@ -22,7 +21,7 @@ class MockComponentRenderer {
 
 // Mock AuthService (to prevent automatic POSTs)
 const authServiceMock = {
-  getTokenAuth: jest.fn().mockReturnValue(of({ token: 'fake' }))
+  getToken: jest.fn().mockReturnValue('fake-token')
 };
 
 describe('Services', () => {

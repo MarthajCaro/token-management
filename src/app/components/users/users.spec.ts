@@ -5,7 +5,6 @@ import { importProvidersFrom } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { TestComponentRenderer } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
-import { of } from 'rxjs';
 import { UserService } from '../../services/user.service';
 import { AuthService } from '../../services/auth.service';
 
@@ -22,7 +21,7 @@ class MockComponentRenderer {
 }
 
 const authServiceMock = {
-  getTokenAuth: jest.fn().mockReturnValue(of({ token: 'fake' }))
+  getToken: jest.fn().mockReturnValue('fake-token')
 };
 
 describe('Users', () => {
@@ -73,14 +72,12 @@ describe('Users', () => {
         id: 32,
         name: 'Johan Muñoz',
         email: 'johan@email.com',
-        password: 'qwe.123',
         role: 'editor'
       },
       {
         id: 31,
         name: 'Mafe Gutierrez',
         email: 'mafe@email.com',
-        password: 'duwj9.45',
         role: 'reader'
       }
     ];

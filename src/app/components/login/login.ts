@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { UserService } from '../../services/user.service'; 
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -14,12 +14,13 @@ import { UserService } from '../../services/user.service';
 export class Login {
   loginForm: FormGroup;
   submitted = false;
+  loading = false;
   errorMessage = '';
 
   constructor(
     private router: Router,
     private fb: FormBuilder,
-    private userService: UserService 
+    private authService: AuthService
   ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
@@ -29,33 +30,26 @@ export class Login {
 
   onSubmit() {
     this.submitted = true;
+    this.errorMessage = '';
     if (this.loginForm.invalid) return;
 
     const { email, password } = this.loginForm.value;
+    this.loading = true;
 
-    // We get all users from the API.
-    this.userService.getUser().subscribe({
-      next: (data) => {
-        const users = Array.isArray(data) ? data : data.users || [];
-        const foundUser = users.find((u: any) => u.email === email && u.password === password);
-
-        if (foundUser) {
-          // We store active user data
-          localStorage.setItem('loggedUser', JSON.stringify(foundUser));
-          localStorage.setItem('userId', foundUser.id.toString());        
-          localStorage.setItem('role', foundUser.role);                   
-
-          alert(`Welcome, ${foundUser.name} (${foundUser.role})`);
-          this.router.navigate(['/dashboard']);
-        } else {
-          this.errorMessage = 'Incorrect email or password';
-        }
+    // The backend verifies the credentials and returns the JWT.
+    this.authService.login(email, password).subscribe({
+      next: (res) => {
+        this.loading = false;
+        this.router.navigate(['/dashboard']);
       },
       error: (err) => {
-        console.error('Error retrieving users:', err);
-        this.errorMessage = 'Error connecting to the server';
+        this.loading = false;
+        console.error('Error logging in:', err);
+        this.errorMessage =
+          err.status === 401
+            ? 'Incorrect email or password'
+            : 'Error connecting to the server';
       }
     });
   }
 }
-
